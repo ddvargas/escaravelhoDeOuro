@@ -4,16 +4,22 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
+#include <locale.h>
+
+#define TAM_BUFFER_READ_FILE 255
+#define TAM_ALFABETO 52
 
 void cifragem_monoalfabetica();
 void decifragem_monoalfabetica();
 bool read_dicionario(FILE *file_dictionary, char alfabeto[], char dicionario[]);
 
 int main(){
+    setlocale(LC_ALL, "");
     int opcao_menu_inicial;
     int sub_opcao_menu;
 
-    printf(" ***** O Escaravelho do Diabo *****");
+    printf(" ***** O Escaravelho do Diabo *****\n\n");
 
     do {
         printf("1-Cifragem e decifragem monoalfabetica  2-Verificação de plaintext\n"
@@ -36,12 +42,12 @@ int main(){
                             decifragem_monoalfabetica();
                         case 0:
                             printf("Voltando\n");
+                            break;
                         default:
                             printf("Opção indisponível\n");
                     }
                 }while (sub_opcao_menu != 0);
                 break;
-                
             case 2: //verificação de plaintext
 
                 break;
@@ -67,7 +73,27 @@ void cifragem_monoalfabetica(){
 
 
 bool read_dicionario(FILE *file_dictionary, char alfabeto[], char dicionario[]){
+    if (file_dictionary != NULL){
+        char buffer[TAM_BUFFER_READ_FILE];
 
+        if (!feof(file_dictionary)){
+            //leitura dos caracteres que compõem a linguagem natural
+            fgets(buffer, TAM_BUFFER_READ_FILE, file_dictionary);
+            if (buffer != NULL){
+                for (int i=0, j=0; j < TAM_ALFABETO; i=i+2, j++){
+                    alfabeto[j] = buffer[i];
+                }
+            }
+            //leitura dos caracteres que correspondem a cifra
+            fgets(buffer, TAM_BUFFER_READ_FILE, file_dictionary);
+            if (buffer != NULL){
+                for (int i=0, j=0; j < TAM_ALFABETO; i=i+2, j++){
+                    dicionario[j] = buffer[i];
+                }
+            }
+        }
+
+    }
 }
 
 void decifragem_monoalfabetica(){
