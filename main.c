@@ -12,11 +12,14 @@
 #define TAM_ALFABETO 52
 
 int cifragem_monoalfabetica();
-void decifragem_monoalfabetica();
+
+int decifragem_monoalfabetica();
+
 bool read_dicionario(FILE *file_dictionary, char alfabeto[], char dicionario[]);
+
 int get_position(char vetor[], char c);
 
-int main(){
+int main() {
     setlocale(LC_ALL, "");
     int opcao_menu_inicial;
     int sub_opcao_menu;
@@ -37,21 +40,24 @@ int main(){
 
                     switch (sub_opcao_menu) {
                         case 1:
-                            if(cifragem_monoalfabetica() < 0) {
+                            if (cifragem_monoalfabetica() < 0) {
                                 printf("Erro ao abrir arquivo. (Certifique-se de digitar apenas "
                                        "o nome e que seja um arquivo .txt)\n");
                             }
                             break;
                         case 2:
+                            if (decifragem_monoalfabetica() < 0) {
+                                printf("Erro ao abrir arquivo. (Certifique-se de digitar apenas "
+                                       "o nome e que seja um arquivo .txt)\n");
+                            }
                             break;
-                            decifragem_monoalfabetica();
                         case 0:
                             printf("Voltando\n");
                             break;
                         default:
                             printf("Opção indisponível\n");
                     }
-                }while (sub_opcao_menu != 0);
+                } while (sub_opcao_menu != 0);
                 break;
             case 2: //verificação de plaintext
 
@@ -71,8 +77,7 @@ int main(){
  * Fluxo de execução para uma encriptação monoalfabetica,
  * solicitando aberturas de arquivos necessarios e fazendo a encriptação
  */
-int cifragem_monoalfabetica(){
-    //TODO: implementar o algoritmo de cifragem
+int cifragem_monoalfabetica() {
     FILE *fdicionario;
     FILE *fcipher;
     FILE *fplaintext;
@@ -83,38 +88,39 @@ int cifragem_monoalfabetica(){
     printf("Nome arquivo dicionario: ");
     scanf("%s", &buffer);
     fdicionario = fopen(strcat(buffer, ".txt"), "r");
-    if (fdicionario == NULL){
+    if (fdicionario == NULL) {
         return -1;
     }
 
-    printf("Nome arquivo plaintext: ");
-    scanf("%s", &buffer);
-    fplaintext = fopen(strcat(buffer, ".txt"), "r");
-    if (fplaintext == NULL){
-        return -1;
-    }
-
-    printf("Defina nome arquivo saida: ");
+    printf("Nome arquivo cifra: ");
     scanf("%s", &buffer);
     fcipher = fopen(strcat(buffer, ".txt"), "w");
-    if (fcipher == NULL){
+    if (fcipher == NULL) {
         return -1;
     }
+
+    printf("Defina o nome do arquivo de saída: ");
+    scanf("%s", &buffer);
+    fplaintext = fopen(strcat(buffer, ".txt"), "r");
+    if (fplaintext == NULL) {
+        return -1;
+    }
+
 
     read_dicionario(fdicionario, alfabeto, dicionario);
 
-    while (!feof(fplaintext)){
-        fgets(buffer, TAM_BUFFER_READ_FILE, fplaintext);
+    while (!feof(fcipher)) {
+        fgets(buffer, TAM_BUFFER_READ_FILE, fcipher);
         int position;
-        for (int i = 0; i < TAM_BUFFER_READ_FILE || !feof(fplaintext); i++) {
-            if (buffer[i] != EOF && buffer[i] != '\0' && buffer[i] != '\n'){
-                if (buffer[i] != ' '){
+        for (int i = 0; i < TAM_BUFFER_READ_FILE || !feof(fcipher); i++) {
+            if (buffer[i] != EOF && buffer[i] != '\0' && buffer[i] != '\n') {
+                if (buffer[i] != ' ') {
                     position = get_position(alfabeto, buffer[i]);
-                    if (position >= 0){
+                    if (position >= 0) {
                         putc(dicionario[position], fcipher);
                     }
                 }
-            } else{
+            } else {
                 break;
             }
         }
@@ -127,7 +133,7 @@ int cifragem_monoalfabetica(){
  * @param c caractere a ser encontrado
  * @return a posição do caractere dentro de vetor, se não for encontrado retorna -1
  */
-int get_position(char vetor[], char c){
+int get_position(char vetor[], char c) {
     for (int i = 0; i < TAM_ALFABETO; ++i) {
         if (c == vetor[i]) return i;
     }
@@ -135,23 +141,22 @@ int get_position(char vetor[], char c){
 }
 
 
-
-bool read_dicionario(FILE *file_dictionary, char alfabeto[], char dicionario[]){
-    if (file_dictionary != NULL){
+bool read_dicionario(FILE *file_dictionary, char alfabeto[], char dicionario[]) {
+    if (file_dictionary != NULL) {
         char buffer[TAM_BUFFER_READ_FILE];
 
-        if (!feof(file_dictionary)){
+        if (!feof(file_dictionary)) {
             //leitura dos caracteres que compõem a linguagem natural
             fgets(buffer, TAM_BUFFER_READ_FILE, file_dictionary);
-            if (buffer != NULL){
-                for (int i=0, j=0; j < TAM_ALFABETO; i=i+2, j++){
+            if (buffer != NULL) {
+                for (int i = 0, j = 0; j < TAM_ALFABETO; i = i + 2, j++) {
                     alfabeto[j] = buffer[i];
                 }
             }
             //leitura dos caracteres que correspondem a cifra
             fgets(buffer, TAM_BUFFER_READ_FILE, file_dictionary);
-            if (buffer != NULL){
-                for (int i=0, j=0; j < TAM_ALFABETO; i=i+2, j++){
+            if (buffer != NULL) {
+                for (int i = 0, j = 0; j < TAM_ALFABETO; i = i + 2, j++) {
                     dicionario[j] = buffer[i];
                 }
             }
@@ -160,14 +165,60 @@ bool read_dicionario(FILE *file_dictionary, char alfabeto[], char dicionario[]){
     }
 }
 
-void decifragem_monoalfabetica(){
-    //TODO: implementar algoritmo de decifragem monoalfabetica
+int decifragem_monoalfabetica() {
+    FILE *fdicionario;
+    FILE *fcipher;
+    FILE *fplaintext;
+    char alfabeto[TAM_ALFABETO];
+    char dicionario[TAM_ALFABETO];
+    char buffer[TAM_BUFFER_READ_FILE];
+
+    printf("Nome arquivo dicionario: ");
+    scanf("%s", &buffer);
+    fdicionario = fopen(strcat(buffer, ".txt"), "r");
+    if (fdicionario == NULL) {
+        return -1;
+    }
+
+    printf("Nome arquivo cifra: ");
+    scanf("%s", &buffer);
+    fcipher = fopen(strcat(buffer, ".txt"), "r");
+    if (fcipher == NULL) {
+        return -1;
+    }
+
+    printf("Defina nome arquivo saida: ");
+    scanf("%s", &buffer);
+    fplaintext = fopen(strcat(buffer, ".txt"), "w");
+    if (fplaintext == NULL) {
+        return -1;
+    }
+
+    read_dicionario(fdicionario, alfabeto, dicionario);
+
+    while (!feof(fcipher)) {
+        fgets(buffer, TAM_BUFFER_READ_FILE, fcipher);
+        int position;
+        for (int i = 0; i < TAM_BUFFER_READ_FILE || !feof(fplaintext); i++) {
+            if (buffer[i] != EOF && buffer[i] != '\0' && buffer[i] != '\n') {
+                position = get_position(dicionario, buffer[i]);
+                if (position >= 0) {
+                    putc(alfabeto[position], fplaintext);
+                }
+            } else {
+                break;
+            }
+        }
+    }
+    fclose(fcipher);
+    fclose(fplaintext);
+    fclose(fdicionario);
 }
 
-void verificacao_plaitext(){
+void verificacao_plaitext() {
     //TODO: implementar o algoritmo do verificacao de plaintext
 }
 
-void verificacao_frequencia(){
+void verificacao_frequencia() {
     //TODO: implementar o algoritmo de vericação de frequencia
 }
