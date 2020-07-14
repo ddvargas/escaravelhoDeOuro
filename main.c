@@ -21,8 +21,9 @@ int get_position(char vetor[], char c);
 
 int main() {
     setlocale(LC_ALL, "");
-    int opcao_menu_inicial;
-    int sub_opcao_menu;
+    short int opcao_menu_inicial;
+    short int sub_opcao_menu;
+    short int resultado;
 
     printf(" ***** O Escaravelho do Diabo *****\n\n");
 
@@ -37,18 +38,34 @@ int main() {
                 do {
                     printf("1-Cifrar mensagem 2-Decifrar mensagem 0-Voltar\n");
                     scanf("%d", &sub_opcao_menu);
-
+                    resultado = 0;
                     switch (sub_opcao_menu) {
                         case 1:
-                            if (cifragem_monoalfabetica() < 0) {
-                                printf("Erro ao abrir arquivo. (Certifique-se de digitar apenas "
-                                       "o nome e que seja um arquivo .txt)\n");
+                            resultado = cifragem_monoalfabetica();
+                            if (resultado < 0) {
+                                if (resultado == -1) {
+                                    printf("Erro ao abrir arquivo. (Certifique-se de digitar apenas "
+                                           "o nome e que seja um arquivo .txt)\n");
+                                }
+                                if (resultado == -2){
+                                    printf("Erro ao ler dicionario\n");
+                                }
+                            } else{
+                                printf("Cifragem ok\n");
                             }
                             break;
                         case 2:
-                            if (decifragem_monoalfabetica() < 0) {
-                                printf("Erro ao abrir arquivo. (Certifique-se de digitar apenas "
-                                       "o nome e que seja um arquivo .txt)\n");
+                            resultado = decifragem_monoalfabetica();
+                            if (resultado < 0) {
+                                if (resultado == -1) {
+                                    printf("Erro ao abrir arquivo. (Certifique-se de digitar apenas "
+                                           "o nome e que seja um arquivo .txt)\n");
+                                }
+                                if (resultado == -2){
+                                    printf("Erro ao ler dicionario\n");
+                                }
+                            } else{
+                                printf("Decifragem ok\n");
                             }
                             break;
                         case 0:
@@ -76,6 +93,7 @@ int main() {
 /**
  * Fluxo de execução para uma encriptação monoalfabetica,
  * solicitando aberturas de arquivos necessarios e fazendo a encriptação
+ * @return Se foi possível ou não realizar a encriptação
  */
 int cifragem_monoalfabetica() {
     FILE *fdicionario;
@@ -92,27 +110,29 @@ int cifragem_monoalfabetica() {
         return -1;
     }
 
-    printf("Nome arquivo cifra: ");
-    scanf("%s", &buffer);
-    fcipher = fopen(strcat(buffer, ".txt"), "w");
-    if (fcipher == NULL) {
-        return -1;
-    }
-
-    printf("Defina o nome do arquivo de saída: ");
+    printf("Nome arquivo mensagem: ");
     scanf("%s", &buffer);
     fplaintext = fopen(strcat(buffer, ".txt"), "r");
     if (fplaintext == NULL) {
         return -1;
     }
 
+    printf("Defina o nome do arquivo de saída: ");
+    scanf("%s", &buffer);
+    fcipher = fopen(strcat(buffer, ".txt"), "w");
+    if (fcipher == NULL) {
+        return -1;
+    }
 
-    read_dicionario(fdicionario, alfabeto, dicionario);
 
-    while (!feof(fcipher)) {
-        fgets(buffer, TAM_BUFFER_READ_FILE, fcipher);
+    if (!read_dicionario(fdicionario, alfabeto, dicionario)){
+        return -1;
+    }
+
+    while (!feof(fplaintext)) {
+        fgets(buffer, TAM_BUFFER_READ_FILE, fplaintext);
         int position;
-        for (int i = 0; i < TAM_BUFFER_READ_FILE || !feof(fcipher); i++) {
+        for (int i = 0; i < TAM_BUFFER_READ_FILE || !feof(fplaintext); i++) {
             if (buffer[i] != EOF && buffer[i] != '\0' && buffer[i] != '\n') {
                 if (buffer[i] != ' ') {
                     position = get_position(alfabeto, buffer[i]);
@@ -125,6 +145,10 @@ int cifragem_monoalfabetica() {
             }
         }
     }
+    fclose(fcipher);
+    fclose(fdicionario);
+    fclose(fplaintext);
+    return 0;
 }
 
 /**
@@ -140,7 +164,13 @@ int get_position(char vetor[], char c) {
     return -1;
 }
 
-
+/**
+ * Faz a leitura de um arquivo de dicionario para encriptação ou decriptação
+ * @param file_dictionary arquivo a ser lido
+ * @param alfabeto onde serão lidos os caracteres da lingua para o plaintext
+ * @param dicionario onde serão lidos os caracteres usados para a encriptação
+ * @return se a leitura foi completada ou não
+ */
 bool read_dicionario(FILE *file_dictionary, char alfabeto[], char dicionario[]) {
     if (file_dictionary != NULL) {
         char buffer[TAM_BUFFER_READ_FILE];
@@ -161,10 +191,16 @@ bool read_dicionario(FILE *file_dictionary, char alfabeto[], char dicionario[]) 
                 }
             }
         }
-
+        return true;
     }
+    return false;
 }
 
+/**
+ * luxo de execução para uma encriptação monoalfabetica,
+ * solicitando aberturas de arquivos necessarios e fazendo a encriptação
+ * @return Se foi possível ou não realizar a decriptação
+ */
 int decifragem_monoalfabetica() {
     FILE *fdicionario;
     FILE *fcipher;
@@ -213,6 +249,7 @@ int decifragem_monoalfabetica() {
     fclose(fcipher);
     fclose(fplaintext);
     fclose(fdicionario);
+    return 0;
 }
 
 void verificacao_plaitext() {
