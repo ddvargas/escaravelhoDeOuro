@@ -262,7 +262,7 @@ void verificacao_plaitext() {
 void verificacao_frequencia() {
     char buffer_read_file[TAM_BUFFER_READ_FILE];
     char *aux;
-    int op_menu, tamanho_table = 0;
+    int op_menu, tamanho_tables = 0, position;
     char *table_chars_freq = NULL;
     int *table_num_ocorrencias_char = NULL;
     float *table_frequ = NULL;
@@ -281,13 +281,13 @@ void verificacao_frequencia() {
 
     while (fgets(buffer_read_file, TAM_BUFFER_READ_FILE, ftabela_frequencia)){
         if (buffer_read_file[0] != '\n'){
-            table_chars_freq = realloc(table_chars_freq, sizeof(char*) * ++tamanho_table);
-            table_num_ocorrencias_char = realloc(table_num_ocorrencias_char, sizeof(int*) * tamanho_table);
-            table_frequ = realloc(table_frequ, sizeof(float *) * tamanho_table);
+            table_chars_freq = realloc(table_chars_freq, sizeof(char*) * ++tamanho_tables);
+            table_num_ocorrencias_char = realloc(table_num_ocorrencias_char, sizeof(int*) * tamanho_tables);
+            table_frequ = realloc(table_frequ, sizeof(float *) * tamanho_tables);
             aux = strtok(buffer_read_file, "|");
-            table_chars_freq[tamanho_table-1] = *aux;
-            table_num_ocorrencias_char[tamanho_table-1] = atoi(strtok(NULL, "|"));
-            table_frequ[tamanho_table-1] = (float) strtof(strtok(NULL, "|"), NULL);
+            table_chars_freq[tamanho_tables - 1] = *aux;
+            table_num_ocorrencias_char[tamanho_tables - 1] = atoi(strtok(NULL, "|"));
+            table_frequ[tamanho_tables - 1] = (float) strtof(strtok(NULL, "|"), NULL);
         }
     }
     //fecha e reabre ele após a leitura para apagar tudo e escrever novamente ao fim da execução
@@ -298,16 +298,31 @@ void verificacao_frequencia() {
     do {
         printf("Selecione um arquivo de cifra para ser analisado: ");
         scanf("%s", buffer_read_file);
-        //abrir arquivo
-        //ler arquivo cifra com um while
-            //para cada caractere do arquivo cifra
-            //comparar se existe no array de table_chars_freq
-            //se existe
-                //incrementar contador do caractere em table_num_ocorrencias_char
-            //Senão
-                //adicionar caractere ao vetor table_chars_freq
-                //realocar table_num_ocorrencias_freq para o caractere e iniciar em 1
-                //realocar num_frequencia para o caractere e iniciar frequencia em 0
+
+        ftabela_cifra = fopen(strcat(buffer_read_file, ".txt"), "r");
+
+        if (ftabela_cifra == NULL){
+            printf("Erro ao abrir arquivo indicado\n");
+        }
+
+        while (!feof(ftabela_cifra)){
+            fgets(buffer_read_file, TAM_BUFFER_READ_FILE, ftabela_cifra);
+            for (int i = 0; i < TAM_BUFFER_READ_FILE || !feof(ftabela_cifra); ++i) {
+                if (buffer_read_file[i] != EOF && buffer_read_file[i] != '\n' && buffer_read_file[i] != '\0'){
+                    position = get_position(table_chars_freq, buffer_read_file[i]);
+                    if (position > -1){
+                        table_num_ocorrencias_char[position]++;
+                    } else{
+                        table_chars_freq = realloc(table_chars_freq, sizeof(char*) * ++tamanho_tables);
+                        table_num_ocorrencias_char = realloc(table_num_ocorrencias_char, sizeof(int*) * tamanho_tables);
+                        table_frequ = realloc(table_frequ, sizeof(float*) * tamanho_tables);
+                        table_chars_freq[tamanho_tables-1] = buffer_read_file[i];
+                        table_num_ocorrencias_char[tamanho_tables-1] = 1;
+                        table_frequ[tamanho_tables-1] = 0;
+                    }
+                }
+            }
+        }
         printf("Deseja analisar outra cifra com a mesma tabela? (1-Sim 0-Não) ");
         scanf("%d", &op_menu);
     }while (op_menu);
