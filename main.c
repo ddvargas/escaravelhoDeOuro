@@ -19,6 +19,8 @@ bool read_dicionario(FILE *file_dictionary, char alfabeto[], char dicionario[]);
 
 int get_position(char vetor[], char c);
 
+void verificacao_frequencia();
+
 int main() {
     setlocale(LC_ALL, "");
     short int opcao_menu_inicial;
@@ -80,10 +82,7 @@ int main() {
 
                 break;
             case 3: //tabela de frequencia
-                do {
-                    printf("Nome de um arquivo de tabela de frequencia existente ou que deseja criar");
-                    scanf()
-                }while ()
+               verificacao_frequencia();
                 break;
             case 0: //sair
                 printf("Bay");
@@ -261,21 +260,44 @@ void verificacao_plaitext() {
 }
 
 void verificacao_frequencia() {
-    char nome_arquivo[100];
-    int op_menu;
-    char *table_chars_freq;
-    int *table_num_ocorrencias_char;
-    float *table_frequ;
+    char buffer_read_file[TAM_BUFFER_READ_FILE];
+    char *aux;
+    int op_menu, tamanho_table = 0;
+    char *table_chars_freq = NULL;
+    int *table_num_ocorrencias_char = NULL;
+    float *table_frequ = NULL;
     FILE *ftabela_frequencia;
     FILE *ftabela_cifra;
 
     printf("Entre com o nome do arquivo da tabela de frequencia existente ou que deseja criar:\n");
-    scanf("%s", nome_arquivo);
-    table_chars_freq = fopen(strcat(nome_arquivo, ".txt"), "w");
-    //ler tabela de frequencia realocando memoria a cada entrada do arquivo de frequencia
+    scanf("%s", buffer_read_file);
+    getchar();
+    ftabela_frequencia = fopen(strcat(buffer_read_file, ".txt"), "r+");
+
+    if (ftabela_frequencia == NULL){
+        printf("Erro ao abrir arquivo de...");
+        exit(-1);
+    }
+
+    while (fgets(buffer_read_file, TAM_BUFFER_READ_FILE, ftabela_frequencia)){
+        if (buffer_read_file[0] != '\n'){
+            table_chars_freq = realloc(table_chars_freq, sizeof(char*) * ++tamanho_table);
+            table_num_ocorrencias_char = realloc(table_num_ocorrencias_char, sizeof(int*) * tamanho_table);
+            table_frequ = realloc(table_frequ, sizeof(float *) * tamanho_table);
+            aux = strtok(buffer_read_file, "|");
+            table_chars_freq[tamanho_table-1] = *aux;
+            table_num_ocorrencias_char[tamanho_table-1] = atoi(strtok(NULL, "|"));
+            table_frequ[tamanho_table-1] = (float) strtof(strtok(NULL, "|"), NULL);
+        }
+    }
+    //fecha e reabre ele após a leitura para apagar tudo e escrever novamente ao fim da execução
+    // ver se não dá problema
+    // uma solução mais inteligente seria criar um arq temporário e oculto
+    fclose(ftabela_frequencia);
+    ftabela_frequencia = fopen(buffer_read_file, "w");
     do {
         printf("Selecione um arquivo de cifra para ser analisado: ");
-        scanf("%s", nome_arquivo);
+        scanf("%s", buffer_read_file);
         //abrir arquivo
         //ler arquivo cifra com um while
             //para cada caractere do arquivo cifra
