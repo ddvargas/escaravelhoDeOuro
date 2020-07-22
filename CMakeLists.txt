@@ -3,4 +3,4 @@ project(OneTimePadCipher C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(otpc main.c)
+add_executable(escaravelho main.c)

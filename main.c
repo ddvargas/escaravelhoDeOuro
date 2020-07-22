@@ -25,7 +25,7 @@ int main() {
     short int sub_opcao_menu;
     short int resultado;
 
-    printf(" ***** O Escaravelho do Diabo *****\n\n");
+    printf(" ***** O Escaravelho de Ouro *****\n\n");
 
     do {
         printf("1-Cifragem e decifragem monoalfabetica  2-Verificação de plaintext\n"
@@ -80,6 +80,10 @@ int main() {
 
                 break;
             case 3: //tabela de frequencia
+                do {
+                    printf("Nome de um arquivo de tabela de frequencia existente ou que deseja criar");
+                    scanf()
+                }while ()
                 break;
             case 0: //sair
                 printf("Bay");
@@ -257,5 +261,36 @@ void verificacao_plaitext() {
 }
 
 void verificacao_frequencia() {
-    //TODO: implementar o algoritmo de vericação de frequencia
+    char nome_arquivo[100];
+    int op_menu;
+    char *table_chars_freq;
+    int *table_num_ocorrencias_char;
+    float *table_frequ;
+    FILE *ftabela_frequencia;
+    FILE *ftabela_cifra;
+
+    printf("Entre com o nome do arquivo da tabela de frequencia existente ou que deseja criar:\n");
+    scanf("%s", nome_arquivo);
+    table_chars_freq = fopen(strcat(nome_arquivo, ".txt"), "w");
+    //ler tabela de frequencia realocando memoria a cada entrada do arquivo de frequencia
+    do {
+        printf("Selecione um arquivo de cifra para ser analisado: ");
+        scanf("%s", nome_arquivo);
+        //abrir arquivo
+        //ler arquivo cifra com um while
+            //para cada caractere do arquivo cifra
+            //comparar se existe no array de table_chars_freq
+            //se existe
+                //incrementar contador do caractere em table_num_ocorrencias_char
+            //Senão
+                //adicionar caractere ao vetor table_chars_freq
+                //realocar table_num_ocorrencias_freq para o caractere e iniciar em 1
+                //realocar num_frequencia para o caractere e iniciar frequencia em 0
+        printf("Deseja analisar outra cifra com a mesma tabela? (1-Sim 0-Não) ");
+        scanf("%d", &op_menu);
+    }while (op_menu);
+    //calcular as frequencias
+    //salvar frequencias e num ocorrencias no arquivo ftabela_frequencia
+    //fechar arquivos
+    //desalocar memorias
 }
