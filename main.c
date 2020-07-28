@@ -13,13 +13,27 @@
 
 int cifragem_monoalfabetica();
 
-int decifragem_monoalfabetica();
+/**
+ * IMplementa a decifragem monoalfabetica de uma cifra
+ * @param fdicionario Dicionário onde se encontram as regras de decifragem
+ * @param fcipher Arquivo com a cifra a ser decifrada
+ * @param fplaintext Arquivo onde será gravado a mensagem decifrada
+ * @return 1 Se foi possível realizar a decifragem
+ */
+int decifragem_monoalfabetica(FILE *fdicionario, FILE *fcipher, FILE *fplaintext);
 
 bool read_dicionario(FILE *file_dictionary, char alfabeto[], char dicionario[]);
 
 int get_position(char vetor[], char c);
 
 void verificacao_frequencia();
+
+/**
+ * Implementa o fluxo de abertura de arquivos e tratamentos de erros para a decifragem de uma
+ * cifra
+ * @return 1 se o fluxo ocorreu bem
+ */
+int fluxo_opcao_decifragem();
 
 /**
  * Calcula a frequencia de ocorrencia de cada caractere, todas as posições se baseiam em vet_caract e são
@@ -66,18 +80,7 @@ int main() {
                             }
                             break;
                         case 2:
-                            resultado = decifragem_monoalfabetica();
-                            if (resultado < 0) {
-                                if (resultado == -1) {
-                                    printf("Erro ao abrir arquivo. (Certifique-se de digitar apenas "
-                                           "o nome e que seja um arquivo .txt)\n");
-                                }
-                                if (resultado == -2){
-                                    printf("Erro ao ler dicionario\n");
-                                }
-                            } else{
-                                printf("Decifragem ok\n");
-                            }
+                            fluxo_opcao_decifragem();
                             break;
                         case 0:
                             printf("Voltando\n");
@@ -208,19 +211,12 @@ bool read_dicionario(FILE *file_dictionary, char alfabeto[], char dicionario[]) 
     return false;
 }
 
-/**
- * luxo de execução para uma encriptação monoalfabetica,
- * solicitando aberturas de arquivos necessarios e fazendo a encriptação
- * @return Se foi possível ou não realizar a decriptação
- */
-int decifragem_monoalfabetica() {
-    FILE *fdicionario;
-    FILE *fcipher;
-    FILE *fplaintext;
-    char alfabeto[TAM_ALFABETO];
-    char dicionario[TAM_ALFABETO];
+int fluxo_opcao_decifragem(){
+    int resultado;
+    FILE *fdicionario, *fcipher, *fplaintext;
     char buffer[TAM_BUFFER_READ_FILE];
 
+    //abrir os files
     printf("Nome arquivo dicionario: ");
     scanf("%s", &buffer);
     fdicionario = fopen(strcat(buffer, ".txt"), "r");
@@ -242,6 +238,32 @@ int decifragem_monoalfabetica() {
         return -1;
     }
 
+    resultado = decifragem_monoalfabetica(fdicionario, fcipher, fplaintext);
+    if (resultado < 0) {
+        if (resultado == -1) {
+            printf("Erro ao abrir arquivo. (Certifique-se de digitar apenas "
+                   "o nome e que seja um arquivo .txt)\n");
+        }
+        if (resultado == -2){
+            printf("Erro ao ler dicionario\n");
+        }
+    } else{
+        printf("Decifragem ok\n");
+    }
+
+    //fechar os files
+    fclose(fcipher);
+    fclose(fplaintext);
+    fclose(fdicionario);
+    return 1;
+}
+
+
+int decifragem_monoalfabetica(FILE *fdicionario, FILE *fcipher, FILE *fplaintext) {
+    char alfabeto[TAM_ALFABETO];
+    char dicionario[TAM_ALFABETO];
+    char buffer[TAM_BUFFER_READ_FILE];
+
     read_dicionario(fdicionario, alfabeto, dicionario);
 
     while (!feof(fcipher)) {
@@ -258,10 +280,8 @@ int decifragem_monoalfabetica() {
             }
         }
     }
-    fclose(fcipher);
-    fclose(fplaintext);
-    fclose(fdicionario);
-    return 0;
+
+    return 1;
 }
 
 void verificacao_plaitext() {
