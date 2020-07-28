@@ -21,6 +21,15 @@ int get_position(char vetor[], char c);
 
 void verificacao_frequencia();
 
+/**
+ * Calcula a frequencia de ocorrencia de cada caractere, todas as posições se baseiam em vet_caract e são
+ * salvas de acordo.
+ * @param vet_caract Vetor de caracteres lidos.
+ * @param vet_ocor Vetor com o número de ocorrencia de cada caractere.
+ * @param vet_freq Vetor onde serão salvas as frequencias.
+ */
+void calculo_frequencia(char *vet_caract, int *vet_ocor, float *vet_freq);
+
 int main() {
     setlocale(LC_ALL, "");
     short int opcao_menu_inicial;
@@ -261,6 +270,7 @@ void verificacao_plaitext() {
 
 void verificacao_frequencia() {
     char buffer_read_file[TAM_BUFFER_READ_FILE];
+    char file_name[TAM_BUFFER_READ_FILE];
     char *aux;
     int op_menu, tamanho_tables = 0, position;
     char *table_chars_freq = NULL;
@@ -270,9 +280,9 @@ void verificacao_frequencia() {
     FILE *ftabela_cifra;
 
     printf("Entre com o nome do arquivo da tabela de frequencia existente ou que deseja criar:\n");
-    scanf("%s", buffer_read_file);
+    scanf("%s", file_name);
     getchar();
-    ftabela_frequencia = fopen(strcat(buffer_read_file, ".txt"), "r+");
+    ftabela_frequencia = fopen(strcat(file_name, ".txt"), "r+");
 
     if (ftabela_frequencia == NULL){
         printf("Erro ao abrir arquivo de...");
@@ -294,7 +304,7 @@ void verificacao_frequencia() {
     // ver se não dá problema
     // uma solução mais inteligente seria criar um arq temporário e oculto
     fclose(ftabela_frequencia);
-    ftabela_frequencia = fopen(buffer_read_file, "w");
+    ftabela_frequencia = fopen(file_name, "w");
     do {
         printf("Selecione um arquivo de cifra para ser analisado: ");
         scanf("%s", buffer_read_file);
@@ -313,21 +323,47 @@ void verificacao_frequencia() {
                     if (position > -1){
                         table_num_ocorrencias_char[position]++;
                     } else{
-                        table_chars_freq = realloc(table_chars_freq, sizeof(char*) * ++tamanho_tables);
-                        table_num_ocorrencias_char = realloc(table_num_ocorrencias_char, sizeof(int*) * tamanho_tables);
-                        table_frequ = realloc(table_frequ, sizeof(float*) * tamanho_tables);
+                        table_chars_freq = (char *) realloc(table_chars_freq, sizeof(char) * ++tamanho_tables);
+                        table_num_ocorrencias_char = (int*) realloc(table_num_ocorrencias_char, sizeof(int) * tamanho_tables);
+                        table_frequ = (float *) realloc(table_frequ, sizeof(float) * tamanho_tables);
                         table_chars_freq[tamanho_tables-1] = buffer_read_file[i];
                         table_num_ocorrencias_char[tamanho_tables-1] = 1;
-                        table_frequ[tamanho_tables-1] = 0;
+                        table_frequ[tamanho_tables-1] = 0.0;
                     }
+                } else{
+                    break;
                 }
             }
         }
+        fclose(ftabela_cifra);
         printf("Deseja analisar outra cifra com a mesma tabela? (1-Sim 0-Não) ");
         scanf("%d", &op_menu);
     }while (op_menu);
-    //calcular as frequencias
+    //calcular a frequencia
+    calculo_frequencia(table_chars_freq, table_num_ocorrencias_char, table_frequ);
+
     //salvar frequencias e num ocorrencias no arquivo ftabela_frequencia
+    for (int j = 0; j < tamanho_tables; j++) {
+        fprintf(ftabela_frequencia, "%c|%d|%f\n",
+                table_chars_freq[j], table_num_ocorrencias_char[j], table_frequ[j]);
+    }
+
     //fechar arquivos
+    fclose(ftabela_frequencia);
     //desalocar memorias
+    free(table_frequ);
+    free(table_num_ocorrencias_char);
+    free(table_chars_freq);
+}
+
+void calculo_frequencia(char *vet_caract, int *vet_ocor, float *vet_freq){
+    if (vet_caract != NULL && vet_ocor != NULL && vet_freq != NULL){
+        int ocorrencia_total = 0;
+        for (int i = 0; i < strlen(vet_caract); i++) {
+            ocorrencia_total += vet_ocor[i];
+        }
+        for (int j = 0; j < strlen(vet_caract); j++) {
+            vet_freq[j] = (float) vet_ocor[j] / ocorrencia_total;
+        }
+    }
 }
