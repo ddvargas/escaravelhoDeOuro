@@ -265,7 +265,22 @@ int decifragem_monoalfabetica() {
 }
 
 void verificacao_plaitext() {
-    //TODO: implementar o algoritmo do verificacao de plaintext
+    FILE *fdicionario;
+    FILE *ftabela;
+    FILE *fcipher;
+    FILE *fplaintext;
+    //abrir arquivo de tabela de substituição
+    //abrir arquivo de cifra
+    //fazer as substituições
+    //salvar em um arquivo de plaintext
+
+    //abrir um arquivo de dicionário de palavras
+    //para cada palavra no dicionario, buscar ela no texto decifrado decifrado (que pode ou não ser correto)
+        //para cada palavra encontrada
+        //destacar a palavra e o nome do arquivo da tabela de substituição
+
+    //fechar os files
+    //desalocar memória, se houver
 }
 
 void verificacao_frequencia() {
