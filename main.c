@@ -69,21 +69,18 @@ int main() {
     short int sub_opcao_menu;
     short int resultado;
 
-    printf(" ***** O Escaravelho de Ouro *****\n\n");
+    printf(" ***** O Escaravelho de Ouro *****\n");
 
     do {
-        //TODO: mudar menu
-        printf("1-Cifragem e decifragem monoalfabetica  2-Verificação de plaintext\n"
-               "3-Tabela de frequência\t\t0-Sair"
-               "\nSelecione: ");
-        scanf("%d", &opcao_menu_inicial);
+        printf("1-Cifragem e decifragem monoalfabetica\n2-Verificação de plaintext\n"
+               "3-Tabela de frequência\n0-Sair\nSelecione: ");
+        scanf("%hi", &opcao_menu_inicial);
 
         switch (opcao_menu_inicial) {
             case 1: //cifragem e decifragem
                 do {
-                    //TODO: mudar submenu
-                    printf("1-Cifrar mensagem 2-Decifrar mensagem 0-Voltar\n");
-                    scanf("%d", &sub_opcao_menu);
+                    printf("\n1-Cifrar mensagem\n2-Decifrar mensagem\n0-Voltar\nSelecione: ");
+                    scanf("%hi", &sub_opcao_menu);
                     resultado = 0;
                     switch (sub_opcao_menu) {
                         case 1:
@@ -104,7 +101,7 @@ int main() {
                             fluxo_opcao_decifragem();
                             break;
                         case 0:
-                            printf("Voltando\n");
+                            printf("\nVoltando\n");
                             break;
                         default:
                             printf("Opção indisponível\n");
@@ -121,7 +118,7 @@ int main() {
                 printf("Bay");
                 break;
             default:
-                printf("Opção incorreta\n");
+                printf("Opção indisponível\n");
         }
     } while (opcao_menu_inicial != 0);
 }
@@ -139,22 +136,22 @@ int cifragem_monoalfabetica() {
     char dicionario[TAM_ALFABETO];
     char buffer[TAM_BUFFER_READ_FILE];
 
-    printf("Nome arquivo dicionario: ");
-    scanf("%s", &buffer);
+    printf("Nome tabela substuição: ");
+    scanf("%s", buffer);
     fdicionario = fopen(strcat(buffer, ".txt"), "r");
     if (fdicionario == NULL) {
         return -1;
     }
 
     printf("Nome arquivo mensagem: ");
-    scanf("%s", &buffer);
+    scanf("%s", buffer);
     fplaintext = fopen(strcat(buffer, ".txt"), "r");
     if (fplaintext == NULL) {
         return -1;
     }
 
     printf("Defina o nome do arquivo de saída: ");
-    scanf("%s", &buffer);
+    scanf("%s", buffer);
     fcipher = fopen(strcat(buffer, ".txt"), "w");
     if (fcipher == NULL) {
         return -1;
@@ -238,22 +235,22 @@ int fluxo_opcao_decifragem() {
     char buffer[TAM_BUFFER_READ_FILE];
 
     //abrir os files
-    printf("Nome arquivo dicionario: ");
-    scanf("%s", &buffer);
+    printf("Nome da tabela de substituição: ");
+    scanf("%s", buffer);
     fdicionario = fopen(strcat(buffer, ".txt"), "r");
     if (fdicionario == NULL) {
         return -1;
     }
 
     printf("Nome arquivo cifra: ");
-    scanf("%s", &buffer);
+    scanf("%s", buffer);
     fcipher = fopen(strcat(buffer, ".txt"), "r");
     if (fcipher == NULL) {
         return -1;
     }
 
-    printf("Defina nome arquivo saida: ");
-    scanf("%s", &buffer);
+    printf("Defina nome arquivo saida (plaintext): ");
+    scanf("%s", buffer);
     fplaintext = fopen(strcat(buffer, ".txt"), "w");
     if (fplaintext == NULL) {
         return -1;
@@ -278,7 +275,6 @@ int fluxo_opcao_decifragem() {
     fclose(fdicionario);
     return 1;
 }
-
 
 int decifragem_monoalfabetica(FILE *fdicionario, FILE *fcipher, FILE *fplaintext) {
     char alfabeto[TAM_ALFABETO];
@@ -384,7 +380,6 @@ void fluxo_verificacao_plaitext() {
     //fechar os files
     //desalocar memória, se houver
 }
-
 
 int boyermoore (char *pattern, char* text){
     int ult[256];
