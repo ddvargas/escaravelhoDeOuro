@@ -44,6 +44,25 @@ int fluxo_opcao_decifragem();
  */
 void calculo_frequencia(char *vet_caract, int *vet_ocor, float *vet_freq);
 
+void fluxo_verificacao_plaitext();
+
+/**
+ * Algoritmo de busca de strings dentro de texto.
+ * @param pattern Padrão a ser buscado.
+ * @param text Texto a ser varrido em busca do pattern.
+ * @return A posição da primeira ocorrencia da pattern dentro do text.
+ */
+int boyermoore (char *pattern, char* text);
+
+/**
+ * Verifica se
+ * @param s
+ * @param t
+ * @return 0 se s for prefixo de t. Um número negativo se s não é prefixo de t mas é menor que t no sentido lexicográfico.
+ * um número positivo se s é maior que t  no sentido lexicográfico (é claro que nesse caso s não é prefixo de t).
+ */
+int prefixcmp(char *s, char *t);
+
 int main() {
     setlocale(LC_ALL, "");
     short int opcao_menu_inicial;
@@ -72,10 +91,10 @@ int main() {
                                     printf("Erro ao abrir arquivo. (Certifique-se de digitar apenas "
                                            "o nome e que seja um arquivo .txt)\n");
                                 }
-                                if (resultado == -2){
+                                if (resultado == -2) {
                                     printf("Erro ao ler dicionario\n");
                                 }
-                            } else{
+                            } else {
                                 printf("Cifragem ok\n");
                             }
                             break;
@@ -91,10 +110,10 @@ int main() {
                 } while (sub_opcao_menu != 0);
                 break;
             case 2: //verificação de plaintext
-
+                fluxo_verificacao_plaitext();
                 break;
             case 3: //tabela de frequencia
-               verificacao_frequencia();
+                verificacao_frequencia();
                 break;
             case 0: //sair
                 printf("Bay");
@@ -140,7 +159,7 @@ int cifragem_monoalfabetica() {
     }
 
 
-    if (!read_dicionario(fdicionario, alfabeto, dicionario)){
+    if (!read_dicionario(fdicionario, alfabeto, dicionario)) {
         return -1;
     }
 
@@ -211,7 +230,7 @@ bool read_dicionario(FILE *file_dictionary, char alfabeto[], char dicionario[]) 
     return false;
 }
 
-int fluxo_opcao_decifragem(){
+int fluxo_opcao_decifragem() {
     int resultado;
     FILE *fdicionario, *fcipher, *fplaintext;
     char buffer[TAM_BUFFER_READ_FILE];
@@ -244,10 +263,10 @@ int fluxo_opcao_decifragem(){
             printf("Erro ao abrir arquivo. (Certifique-se de digitar apenas "
                    "o nome e que seja um arquivo .txt)\n");
         }
-        if (resultado == -2){
+        if (resultado == -2) {
             printf("Erro ao ler dicionario\n");
         }
-    } else{
+    } else {
         printf("Decifragem ok\n");
     }
 
@@ -284,23 +303,106 @@ int decifragem_monoalfabetica(FILE *fdicionario, FILE *fcipher, FILE *fplaintext
     return 1;
 }
 
-void verificacao_plaitext() {
+void fluxo_verificacao_plaitext() {
     FILE *fdicionario;
     FILE *ftabela;
     FILE *fcipher;
     FILE *fplaintext;
-    //abrir arquivo de tabela de substituição
-    //abrir arquivo de cifra
-    //fazer as substituições
-    //salvar em um arquivo de plaintext
+    char nome_arq[100];
+    char bufferd[TAM_BUFFER_READ_FILE];
+    char bufferc[TAM_BUFFER_READ_FILE];
+    int op_repeticao, num_tabelas = 0;
 
-    //abrir um arquivo de dicionário de palavras
-    //para cada palavra no dicionario, buscar ela no texto decifrado decifrado (que pode ou não ser correto)
-        //para cada palavra encontrada
-        //destacar a palavra e o nome do arquivo da tabela de substituição
+
+    //abrir arquivo de tabela de substituição
+    printf("Nome arquivo da tabela substituição: ");
+    scanf("%s", nome_arq);
+    ftabela = fopen(strcat(nome_arq, ".txt"), "r");
+    if (ftabela == NULL) {
+        printf("ERRO - Abrir arquivo de tabela de substituição\n");
+        return;
+    }
+
+    //abrir arquivo de cifra
+    printf("Nome arquivo cifrado: ");
+    scanf("%s", nome_arq);
+    fcipher = fopen(strcat(nome_arq, ".txt"), "r");
+    if (fcipher == NULL) {
+        printf("ERRO - Abertura do arquivo de cifra\n");
+        return;
+    }
+
+    //salvar em um arquivo de plaintext
+    printf("Nome do arquivo para salvar o plaintext: ");
+    scanf("%s", nome_arq);
+    fplaintext = fopen(strcat(nome_arq, ".txt"), "a+");
+    if (fplaintext == NULL) {
+        printf("ERRO - Abertura de arquivo para salvar o plaintext");
+        return;
+    }
+
+
+    //fazer as substituições
+    if (decifragem_monoalfabetica(ftabela, fcipher, fplaintext)) {
+        printf("Decifragem ok\n");
+    } else {
+        printf("ERRO - Houve um problema na decifragem da mensagem\n");
+    }
+
+    //retorna o ponteiro para o início do arquivo para fazer a leitura
+    rewind(fplaintext);
+
+    do {
+        //abrir um arquivo de dicionário de palavras
+        printf("Nome do arquivo de dicionário: ");
+        scanf("%s", nome_arq);
+        fdicionario = fopen(strcat(nome_arq, ".txt"), "r");
+        if (fdicionario != NULL) {
+            while (fgets(bufferd, TAM_BUFFER_READ_FILE, fdicionario)) {
+                //para cada palavra no dicionario, buscar ela no texto decifrado (que pode ou não ser correto)
+                while (fgets(bufferc, TAM_BUFFER_READ_FILE, fplaintext)) {
+                    if (boyermoore(bufferd, bufferc) >= 0){
+                        //há uma ocorrencia do dicionario dentro do
+                    }
+                }
+                //para cada palavra encontrada
+                // destacar a palavra e o nome do arquivo da tabela de substituição
+
+            }
+        }
+    } while (op_repeticao);
+
 
     //fechar os files
     //desalocar memória, se houver
+}
+
+
+int boyermoore (char *pattern, char* text){
+    int ult[256];
+    int c, i, j, k;
+    int m = strlen(pattern), n = strlen(text);
+
+    // pré-processamento da palavra
+    for (c = 0; c < 256; ++c)  ult[c] = 0;
+    for (i = 0; i < m; ++i)  ult[pattern[i]] = i;
+
+    // busca da palavra no texto
+    k = 0;
+    while (k <= n - m) {
+        if (prefixcmp(pattern, text + k) == 0)
+            return k;
+        k += m - ult[text[k + m]];
+    }
+    return -1;
+}
+
+int prefixcmp(char *s, char *t) {
+    int i;
+    for (i = 0; s[i] == t[i]; i++)
+        if (s[i] == '\0') return 0;
+    if (s[i] == '\0') return 0;
+    else return s[i] - t[i];
 }
 
 void verificacao_frequencia() {
@@ -319,15 +421,15 @@ void verificacao_frequencia() {
     getchar();
     ftabela_frequencia = fopen(strcat(file_name, ".txt"), "r+");
 
-    if (ftabela_frequencia == NULL){
+    if (ftabela_frequencia == NULL) {
         printf("Erro ao abrir arquivo de...");
         exit(-1);
     }
 
-    while (fgets(buffer_read_file, TAM_BUFFER_READ_FILE, ftabela_frequencia)){
-        if (buffer_read_file[0] != '\n'){
-            table_chars_freq = realloc(table_chars_freq, sizeof(char*) * ++tamanho_tables);
-            table_num_ocorrencias_char = realloc(table_num_ocorrencias_char, sizeof(int*) * tamanho_tables);
+    while (fgets(buffer_read_file, TAM_BUFFER_READ_FILE, ftabela_frequencia)) {
+        if (buffer_read_file[0] != '\n') {
+            table_chars_freq = realloc(table_chars_freq, sizeof(char *) * ++tamanho_tables);
+            table_num_ocorrencias_char = realloc(table_num_ocorrencias_char, sizeof(int *) * tamanho_tables);
             table_frequ = realloc(table_frequ, sizeof(float *) * tamanho_tables);
             aux = strtok(buffer_read_file, "|");
             table_chars_freq[tamanho_tables - 1] = *aux;
@@ -346,26 +448,27 @@ void verificacao_frequencia() {
 
         ftabela_cifra = fopen(strcat(buffer_read_file, ".txt"), "r");
 
-        if (ftabela_cifra == NULL){
+        if (ftabela_cifra == NULL) {
             printf("Erro ao abrir arquivo indicado\n");
         }
 
-        while (!feof(ftabela_cifra)){
+        while (!feof(ftabela_cifra)) {
             fgets(buffer_read_file, TAM_BUFFER_READ_FILE, ftabela_cifra);
             for (int i = 0; i < TAM_BUFFER_READ_FILE || !feof(ftabela_cifra); ++i) {
-                if (buffer_read_file[i] != EOF && buffer_read_file[i] != '\n' && buffer_read_file[i] != '\0'){
+                if (buffer_read_file[i] != EOF && buffer_read_file[i] != '\n' && buffer_read_file[i] != '\0') {
                     position = get_position(table_chars_freq, buffer_read_file[i]);
-                    if (position > -1){
+                    if (position > -1) {
                         table_num_ocorrencias_char[position]++;
-                    } else{
+                    } else {
                         table_chars_freq = (char *) realloc(table_chars_freq, sizeof(char) * ++tamanho_tables);
-                        table_num_ocorrencias_char = (int*) realloc(table_num_ocorrencias_char, sizeof(int) * tamanho_tables);
+                        table_num_ocorrencias_char = (int *) realloc(table_num_ocorrencias_char,
+                                                                     sizeof(int) * tamanho_tables);
                         table_frequ = (float *) realloc(table_frequ, sizeof(float) * tamanho_tables);
-                        table_chars_freq[tamanho_tables-1] = buffer_read_file[i];
-                        table_num_ocorrencias_char[tamanho_tables-1] = 1;
-                        table_frequ[tamanho_tables-1] = 0.0;
+                        table_chars_freq[tamanho_tables - 1] = buffer_read_file[i];
+                        table_num_ocorrencias_char[tamanho_tables - 1] = 1;
+                        table_frequ[tamanho_tables - 1] = 0.0;
                     }
-                } else{
+                } else {
                     break;
                 }
             }
@@ -373,7 +476,7 @@ void verificacao_frequencia() {
         fclose(ftabela_cifra);
         printf("Deseja analisar outra cifra com a mesma tabela? (1-Sim 0-Não) ");
         scanf("%d", &op_menu);
-    }while (op_menu);
+    } while (op_menu);
     //calcular a frequencia
     calculo_frequencia(table_chars_freq, table_num_ocorrencias_char, table_frequ);
 
@@ -391,8 +494,8 @@ void verificacao_frequencia() {
     free(table_chars_freq);
 }
 
-void calculo_frequencia(char *vet_caract, int *vet_ocor, float *vet_freq){
-    if (vet_caract != NULL && vet_ocor != NULL && vet_freq != NULL){
+void calculo_frequencia(char *vet_caract, int *vet_ocor, float *vet_freq) {
+    if (vet_caract != NULL && vet_ocor != NULL && vet_freq != NULL) {
         int ocorrencia_total = 0;
         for (int i = 0; i < strlen(vet_caract); i++) {
             ocorrencia_total += vet_ocor[i];
