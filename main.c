@@ -72,6 +72,7 @@ int main() {
     printf(" ***** O Escaravelho de Ouro *****\n\n");
 
     do {
+        //TODO: mudar menu
         printf("1-Cifragem e decifragem monoalfabetica  2-Verificação de plaintext\n"
                "3-Tabela de frequência\t\t0-Sair"
                "\nSelecione: ");
@@ -80,6 +81,7 @@ int main() {
         switch (opcao_menu_inicial) {
             case 1: //cifragem e decifragem
                 do {
+                    //TODO: mudar submenu
                     printf("1-Cifrar mensagem 2-Decifrar mensagem 0-Voltar\n");
                     scanf("%d", &sub_opcao_menu);
                     resultado = 0;
@@ -308,16 +310,18 @@ void fluxo_verificacao_plaitext() {
     FILE *ftabela;
     FILE *fcipher;
     FILE *fplaintext;
-    char nome_arq[100];
+    char nome_arq_table[100];
+    char nome_arq_plaintext[100];
+    char nome_arq_dcio[100];
     char bufferd[TAM_BUFFER_READ_FILE];
     char bufferc[TAM_BUFFER_READ_FILE];
-    int op_repeticao, num_tabelas = 0;
+    int op_repeticao, resultado;
 
 
     //abrir arquivo de tabela de substituição
     printf("Nome arquivo da tabela substituição: ");
-    scanf("%s", nome_arq);
-    ftabela = fopen(strcat(nome_arq, ".txt"), "r");
+    scanf("%s", nome_arq_table);
+    ftabela = fopen(strcat(nome_arq_table, ".txt"), "r");
     if (ftabela == NULL) {
         printf("ERRO - Abrir arquivo de tabela de substituição\n");
         return;
@@ -325,8 +329,8 @@ void fluxo_verificacao_plaitext() {
 
     //abrir arquivo de cifra
     printf("Nome arquivo cifrado: ");
-    scanf("%s", nome_arq);
-    fcipher = fopen(strcat(nome_arq, ".txt"), "r");
+    scanf("%s", nome_arq_plaintext);
+    fcipher = fopen(strcat(nome_arq_plaintext, ".txt"), "r");
     if (fcipher == NULL) {
         printf("ERRO - Abertura do arquivo de cifra\n");
         return;
@@ -334,8 +338,8 @@ void fluxo_verificacao_plaitext() {
 
     //salvar em um arquivo de plaintext
     printf("Nome do arquivo para salvar o plaintext: ");
-    scanf("%s", nome_arq);
-    fplaintext = fopen(strcat(nome_arq, ".txt"), "a+");
+    scanf("%s", nome_arq_plaintext);
+    fplaintext = fopen(strcat(nome_arq_plaintext, ".txt"), "a+");
     if (fplaintext == NULL) {
         printf("ERRO - Abertura de arquivo para salvar o plaintext");
         return;
@@ -355,19 +359,23 @@ void fluxo_verificacao_plaitext() {
     do {
         //abrir um arquivo de dicionário de palavras
         printf("Nome do arquivo de dicionário: ");
-        scanf("%s", nome_arq);
-        fdicionario = fopen(strcat(nome_arq, ".txt"), "r");
+        scanf("%s", nome_arq_dcio);
+        fdicionario = fopen(strcat(nome_arq_dcio, ".txt"), "r");
         if (fdicionario != NULL) {
             while (fgets(bufferd, TAM_BUFFER_READ_FILE, fdicionario)) {
                 //para cada palavra no dicionario, buscar ela no texto decifrado (que pode ou não ser correto)
+                resultado = 1;
                 while (fgets(bufferc, TAM_BUFFER_READ_FILE, fplaintext)) {
                     if (boyermoore(bufferd, bufferc) >= 0){
-                        //há uma ocorrencia do dicionario dentro do
+                        printf("Encontrada a palavra %s no arquivo de plaintext %s, decifrado com a tabela %s\n",
+                                bufferd, nome_arq_plaintext, nome_arq_table);
+                        resultado = 0;
                     }
                 }
-                //para cada palavra encontrada
-                // destacar a palavra e o nome do arquivo da tabela de substituição
-
+                if (resultado){
+                    printf("Palavra %s não encontrada\n", bufferd);
+                }
+                rewind(fplaintext);
             }
         }
     } while (op_repeticao);
