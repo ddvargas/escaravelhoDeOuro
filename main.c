@@ -22,6 +22,14 @@ int cifragem_monoalfabetica();
  */
 int decifragem_monoalfabetica(FILE *fdicionario, FILE *fcipher, FILE *fplaintext);
 
+/**
+ * Verifica se uma palavra existe dentro de uma matriz de palavras alocado dinamicamente.
+ * @param palavras_encontradas Matriz
+ * @param pal Palavra a ser encontrada
+ * @return True caso seja encontrada, senão retorna false.
+ */
+bool existe_banco(char **palavras_encontradas, int tamanho, char *pal);
+
 bool read_dicionario(FILE *file_dictionary, char alfabeto[], char dicionario[]);
 
 int get_position(char vetor[], char c);
@@ -46,23 +54,6 @@ void calculo_frequencia(char *vet_caract, int *vet_ocor, float *vet_freq);
 
 void fluxo_verificacao_plaitext();
 
-/**
- * Algoritmo de busca de strings dentro de texto.
- * @param pattern Padrão a ser buscado.
- * @param text Texto a ser varrido em busca do pattern.
- * @return A posição da primeira ocorrencia da pattern dentro do text.
- */
-int boyermoore (char *pattern, char* text);
-
-/**
- * Verifica se
- * @param s
- * @param t
- * @return 0 se s for prefixo de t. Um número negativo se s não é prefixo de t mas é menor que t no sentido lexicográfico.
- * um número positivo se s é maior que t  no sentido lexicográfico (é claro que nesse caso s não é prefixo de t).
- */
-int prefixcmp(char *s, char *t);
-
 int main() {
     setlocale(LC_ALL, "");
     short int opcao_menu_inicial;
@@ -81,10 +72,10 @@ int main() {
                 do {
                     printf("\n1-Cifrar mensagem\n2-Decifrar mensagem\n0-Voltar\nSelecione: ");
                     scanf("%hi", &sub_opcao_menu);
-                    resultado = 0;
+                    resultado;
                     switch (sub_opcao_menu) {
                         case 1:
-                            resultado = cifragem_monoalfabetica();
+                            resultado = (short int) cifragem_monoalfabetica();
                             if (resultado < 0) {
                                 if (resultado == -1) {
                                     printf("Erro ao abrir arquivo. (Certifique-se de digitar apenas "
@@ -306,12 +297,14 @@ void fluxo_verificacao_plaitext() {
     FILE *ftabela;
     FILE *fcipher;
     FILE *fplaintext;
+    int num_word_encontradas = 0;
     char nome_arq_table[100];
+    char **palavras_encontradas = NULL;
     char nome_arq_plaintext[100];
     char nome_arq_dcio[100];
     char bufferd[TAM_BUFFER_READ_FILE];
     char bufferc[TAM_BUFFER_READ_FILE];
-    int op_repeticao, resultado;
+    short int op_repeticao;
 
 
     //abrir arquivo de tabela de substituição
@@ -322,7 +315,6 @@ void fluxo_verificacao_plaitext() {
         printf("ERRO - Abrir arquivo de tabela de substituição\n");
         return;
     }
-
     //abrir arquivo de cifra
     printf("Nome arquivo cifrado: ");
     scanf("%s", nome_arq_plaintext);
@@ -335,7 +327,7 @@ void fluxo_verificacao_plaitext() {
     //salvar em um arquivo de plaintext
     printf("Nome do arquivo para salvar o plaintext: ");
     scanf("%s", nome_arq_plaintext);
-    fplaintext = fopen(strcat(nome_arq_plaintext, ".txt"), "a+");
+    fplaintext = fopen(strcat(nome_arq_plaintext, ".txt"), "w+");
     if (fplaintext == NULL) {
         printf("ERRO - Abertura de arquivo para salvar o plaintext");
         return;
@@ -359,53 +351,65 @@ void fluxo_verificacao_plaitext() {
         fdicionario = fopen(strcat(nome_arq_dcio, ".txt"), "r");
         if (fdicionario != NULL) {
             while (fgets(bufferd, TAM_BUFFER_READ_FILE, fdicionario)) {
+                bufferd[strlen(bufferd) - 1] = '\0'; //como o fgets está lendo o \n seto a ultima posição com o \0
                 //para cada palavra no dicionario, buscar ela no texto decifrado (que pode ou não ser correto)
-                resultado = 1;
                 while (fgets(bufferc, TAM_BUFFER_READ_FILE, fplaintext)) {
-                    if (boyermoore(bufferd, bufferc) >= 0){
-                        printf("Encontrada a palavra %s no arquivo de plaintext %s, decifrado com a tabela %s\n",
-                                bufferd, nome_arq_plaintext, nome_arq_table);
-                        resultado = 0;
+                    if (strstr(bufferc, bufferd)) {
+                        if (!existe_banco(palavras_encontradas, num_word_encontradas, bufferd)) {
+                            palavras_encontradas = (char **) realloc(palavras_encontradas,
+                                                                     sizeof(char *) * ++num_word_encontradas);
+                            palavras_encontradas[num_word_encontradas - 1] = (char *) malloc(
+                                    sizeof(char) * (strlen(bufferd) + 1));
+                            strcpy(palavras_encontradas[num_word_encontradas - 1], bufferd);
+                        }
                     }
-                }
-                if (resultado){
-                    printf("Palavra %s não encontrada\n", bufferd);
                 }
                 rewind(fplaintext);
             }
+            if (num_word_encontradas != 0) {
+                //printar o resultado
+                printf("Palavras do arquivo %s encontradas no plaintext decifrado:\n", nome_arq_dcio);
+                for (int i = 0; i < num_word_encontradas; ++i) {
+                    printf("%s - ", palavras_encontradas[i]);
+                }
+            } else {
+                printf("Nenhuma palavras do arquivo %s encontrada no plaintext decifrado\n", nome_arq_dcio);
+            }
+        } else {
+            printf("Não foi possível encontrar o arquivo\n");
         }
+
+        //desalocar vetor de palavras se houver
+        if (palavras_encontradas != NULL) {
+            for (int i = 0; i < num_word_encontradas; ++i) {
+                free(palavras_encontradas[i]);
+            }
+            free(palavras_encontradas);
+            num_word_encontradas = 0;
+        }
+
+        printf("\nDeseja verificar com mais um arquivo? 1-Sim 0-Não\nSelecione: ");
+        scanf("%hi", &op_repeticao);
     } while (op_repeticao);
 
-
-    //fechar os files
+    fclose(fplaintext);
+    fclose(fcipher);
+    fclose(fdicionario);
+    fclose(ftabela);
     //desalocar memória, se houver
 }
 
-int boyermoore (char *pattern, char* text){
-    int ult[256];
-    int c, i, j, k;
-    int m = strlen(pattern), n = strlen(text);
-
-    // pré-processamento da palavra
-    for (c = 0; c < 256; ++c)  ult[c] = 0;
-    for (i = 0; i < m; ++i)  ult[pattern[i]] = i;
-
-    // busca da palavra no texto
-    k = 0;
-    while (k <= n - m) {
-        if (prefixcmp(pattern, text + k) == 0)
-            return k;
-        k += m - ult[text[k + m]];
+bool existe_banco(char **palavras_encontradas, int tamanho, char *pal) {
+    if (pal == NULL || palavras_encontradas == NULL) {
+        return false;
     }
-    return -1;
-}
 
-int prefixcmp(char *s, char *t) {
-    int i;
-    for (i = 0; s[i] == t[i]; i++)
-        if (s[i] == '\0') return 0;
-    if (s[i] == '\0') return 0;
-    else return s[i] - t[i];
+    for (int i = 0; i < tamanho; i++) {
+        if (strstr(palavras_encontradas[i], pal)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void verificacao_frequencia() {
