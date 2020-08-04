@@ -11,6 +11,11 @@
 #define TAM_BUFFER_READ_FILE 255
 #define TAM_ALFABETO 52
 
+/**
+ * Fluxo de execução para uma encriptação monoalfabetica,
+ * solicitando aberturas de arquivos necessarios e fazendo a encriptação
+ * @return Se foi possível ou não realizar a encriptação
+ */
 int cifragem_monoalfabetica();
 
 /**
@@ -30,11 +35,27 @@ int decifragem_monoalfabetica(FILE *fdicionario, FILE *fcipher, FILE *fplaintext
  */
 bool existe_banco(char **palavras_encontradas, int tamanho, char *pal);
 
+/**
+ * Faz a leitura de um arquivo de dicionario para encriptação ou decriptação
+ * @param file_dictionary arquivo a ser lido
+ * @param alfabeto onde serão lidos os caracteres da lingua para o plaintext
+ * @param dicionario onde serão lidos os caracteres usados para a encriptação
+ * @return se a leitura foi completada ou não
+ */
 bool read_dicionario(FILE *file_dictionary, char alfabeto[], char dicionario[]);
 
+/**
+ * Verifica a primira ocorrencia de um caractere dentro de um vetor
+ * @param vetor a ser analisado
+ * @param c caractere a ser encontrado
+ * @return a posição do caractere dentro de vetor, se não for encontrado retorna -1
+ */
 int get_position(char vetor[], char c);
 
-void verificacao_frequencia();
+/**
+ * Implementa o fluxo necessário para fazer uma verificação de frequência.
+ */
+void fluxo_verificacao_frequencia();
 
 /**
  * Implementa o fluxo de abertura de arquivos e tratamentos de erros para a decifragem de uma
@@ -52,6 +73,9 @@ int fluxo_opcao_decifragem();
  */
 void calculo_frequencia(char *vet_caract, int *vet_ocor, float *vet_freq);
 
+/**
+ * Implementa o fluxo de verificação de plaintext.
+ */
 void fluxo_verificacao_plaitext();
 
 int main() {
@@ -103,7 +127,7 @@ int main() {
                 fluxo_verificacao_plaitext();
                 break;
             case 3: //tabela de frequencia
-                verificacao_frequencia();
+                fluxo_verificacao_frequencia();
                 break;
             case 0: //sair
                 printf("Bay");
@@ -114,11 +138,6 @@ int main() {
     } while (opcao_menu_inicial != 0);
 }
 
-/**
- * Fluxo de execução para uma encriptação monoalfabetica,
- * solicitando aberturas de arquivos necessarios e fazendo a encriptação
- * @return Se foi possível ou não realizar a encriptação
- */
 int cifragem_monoalfabetica() {
     FILE *fdicionario;
     FILE *fcipher;
@@ -175,12 +194,6 @@ int cifragem_monoalfabetica() {
     return 0;
 }
 
-/**
- * Verifica a primira ocorrencia de um caractere dentro de um vetor
- * @param vetor a ser analisado
- * @param c caractere a ser encontrado
- * @return a posição do caractere dentro de vetor, se não for encontrado retorna -1
- */
 int get_position(char vetor[], char c) {
     for (int i = 0; i < TAM_ALFABETO; ++i) {
         if (c == vetor[i]) return i;
@@ -188,13 +201,6 @@ int get_position(char vetor[], char c) {
     return -1;
 }
 
-/**
- * Faz a leitura de um arquivo de dicionario para encriptação ou decriptação
- * @param file_dictionary arquivo a ser lido
- * @param alfabeto onde serão lidos os caracteres da lingua para o plaintext
- * @param dicionario onde serão lidos os caracteres usados para a encriptação
- * @return se a leitura foi completada ou não
- */
 bool read_dicionario(FILE *file_dictionary, char alfabeto[], char dicionario[]) {
     if (file_dictionary != NULL) {
         char buffer[TAM_BUFFER_READ_FILE];
@@ -412,7 +418,7 @@ bool existe_banco(char **palavras_encontradas, int tamanho, char *pal) {
     return false;
 }
 
-void verificacao_frequencia() {
+void fluxo_verificacao_frequencia() {
     char buffer_read_file[TAM_BUFFER_READ_FILE];
     char file_name[TAM_BUFFER_READ_FILE];
     char *aux;
