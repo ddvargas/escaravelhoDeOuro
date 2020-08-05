@@ -197,7 +197,10 @@ int cifragem_monoalfabetica() {
 }
 
 int get_position(char vetor[], char c) {
-    for (int i = 0; i < TAM_ALFABETO; ++i) {
+    if (vetor == NULL || c == NULL){
+        return -1;
+    }
+    for (int i = 0; i < strlen(vetor); i++) {
         if (c == vetor[i]) return i;
     }
     return -1;
@@ -474,10 +477,9 @@ void fluxo_verificacao_frequencia() {
 
         while (!feof(ftabela_cifra)) {
             fgets(buffer_read_file, TAM_BUFFER_READ_FILE, ftabela_cifra);
-            for (int i = 0; i < TAM_BUFFER_READ_FILE || !feof(ftabela_cifra); ++i) {
+            for (int i = 0; i < strlen(buffer_read_file); ++i) {
                 if (buffer_read_file[i] != EOF && buffer_read_file[i] != '\n' && buffer_read_file[i] != '\0') {
                     position = get_position(table_chars_freq, buffer_read_file[i]);
-                    //TODO: get position tem que retornar -1 caso o vetor seja NULL
                     if (position > -1) {
                         table_num_ocorrencias_char[position]++;
                     } else {
