@@ -362,7 +362,9 @@ void fluxo_verificacao_plaitext() {
         fdicionario = fopen(strcat(nome_arq_dcio, ".txt"), "r");
         if (fdicionario != NULL) {
             while (fgets(bufferd, TAM_BUFFER_READ_FILE, fdicionario)) {
-                bufferd[strlen(bufferd) - 1] = '\0'; //como o fgets está lendo o \n seto a ultima posição com o \0
+                if (bufferd[strlen(bufferd) - 1] == '\n'){
+                    bufferd[strlen(bufferd) - 1] = '\0'; //como o fgets está lendo o \n seto a ultima posição com o \0
+                }
                 //para cada palavra no dicionario, buscar ela no texto decifrado (que pode ou não ser correto)
                 while (fgets(bufferc, TAM_BUFFER_READ_FILE, fplaintext)) {
                     if (strstr(bufferc, bufferd)) {
@@ -401,14 +403,12 @@ void fluxo_verificacao_plaitext() {
 
         printf("\nDeseja verificar com mais um arquivo? 1-Sim 0-Não\nSelecione: ");
         scanf("%hi", &op_repeticao);
-        //TODO: pq dá erro de segmentação ao abrir outro arquivo para verificação?
     } while (op_repeticao);
 
     fclose(fplaintext);
     fclose(fcipher);
     fclose(fdicionario);
     fclose(ftabela);
-    //desalocar memória, se houver
 }
 
 bool existe_banco(char **palavras_encontradas, int tamanho, char *pal) {
@@ -459,11 +459,9 @@ void fluxo_verificacao_frequencia() {
             table_frequ[tamanho_tables - 1] = (float) strtof(strtok(NULL, "|"), NULL);
         }
     }
-    //fecha e reabre ele após a leitura para apagar tudo e escrever novamente ao fim da execução
-    // ver se não dá problema
-    // uma solução mais inteligente seria criar um arq temporário e oculto
+
     fclose(ftabela_frequencia);
-    ftabela_frequencia = fopen(file_name, "w");
+
     do {
         printf("Selecione um arquivo de cifra para ser analisado: ");
         scanf("%s", buffer_read_file);
@@ -483,7 +481,6 @@ void fluxo_verificacao_frequencia() {
                     if (position > -1) {
                         table_num_ocorrencias_char[position]++;
                     } else {
-                        //TODO: caso a tabela exista, não ta pegando os valores existentes e somando
                         table_chars_freq = (char *) realloc(table_chars_freq, sizeof(char) * ++tamanho_tables);
                         table_num_ocorrencias_char = (int *) realloc(table_num_ocorrencias_char,
                                                                      sizeof(int) * tamanho_tables);
@@ -504,6 +501,11 @@ void fluxo_verificacao_frequencia() {
     //calcular a frequencia
     calculo_frequencia(table_chars_freq, table_num_ocorrencias_char, table_frequ);
 
+    ftabela_frequencia = fopen(file_name, "w");
+    if (ftabela_frequencia == NULL){
+        printf("Erro ao abrir arquivo %s para gravação\n");
+        return;
+    }
     //salvar frequencias e num ocorrencias no arquivo ftabela_frequencia
     for (int j = 0; j < tamanho_tables; j++) {
         fprintf(ftabela_frequencia, "%c|%d|%f\n",
