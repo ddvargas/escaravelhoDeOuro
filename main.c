@@ -84,17 +84,17 @@ int main() {
     short int sub_opcao_menu;
     short int resultado;
 
-    printf(" ***** O Escaravelho de Ouro *****\n");
+    printf("\n ***** O Escaravelho de Ouro *****\n");
 
     do {
-        printf("1-Cifragem e decifragem monoalfabetica\n2-Verificação de plaintext\n"
-               "3-Tabela de frequência\n0-Sair\nSelecione: ");
+        printf("\n[1]-Cifragem e decifragem monoalfabetica\n[2]-Verificação de plaintext\n"
+               "[3]-Tabela de frequência\n[0]-Sair\nSelecione: ");
         scanf("%hi", &opcao_menu_inicial);
 
         switch (opcao_menu_inicial) {
             case 1: //cifragem e decifragem
                 do {
-                    printf("\n1-Cifrar mensagem\n2-Decifrar mensagem\n0-Voltar\nSelecione: ");
+                    printf("\nCifragem e decifragem\n[1]-Cifrar mensagem\n[2]-Decifrar mensagem\n[0]-Voltar\nSelecione: ");
                     scanf("%hi", &sub_opcao_menu);
                     resultado;
                     switch (sub_opcao_menu) {
@@ -116,7 +116,7 @@ int main() {
                             fluxo_opcao_decifragem();
                             break;
                         case 0:
-                            printf("\nVoltando\n");
+                            printf("Voltando\n\n");
                             break;
                         default:
                             printf("Opção indisponível\n");
@@ -124,13 +124,15 @@ int main() {
                 } while (sub_opcao_menu != 0);
                 break;
             case 2: //verificação de plaintext
+                printf("\nVerificação de plaintext\n");
                 fluxo_verificacao_plaitext();
                 break;
             case 3: //tabela de frequencia
+                printf("\nTabela de frequência\n");
                 fluxo_verificacao_frequencia();
                 break;
             case 0: //sair
-                printf("Bay");
+                printf("Saindo\n");
                 break;
             default:
                 printf("Opção indisponível\n");
@@ -396,6 +398,7 @@ void fluxo_verificacao_plaitext() {
 
         printf("\nDeseja verificar com mais um arquivo? 1-Sim 0-Não\nSelecione: ");
         scanf("%hi", &op_repeticao);
+        //TODO: pq dá erro de segmentação ao abrir outro arquivo para verificação?
     } while (op_repeticao);
 
     fclose(fplaintext);
@@ -429,16 +432,19 @@ void fluxo_verificacao_frequencia() {
     FILE *ftabela_frequencia;
     FILE *ftabela_cifra;
 
-    printf("Entre com o nome do arquivo da tabela de frequencia existente ou que deseja criar:\n");
+    printf("Nome do arquivo da tabela de frequência existente ou que deseja criar:\n");
     scanf("%s", file_name);
-    getchar();
-    ftabela_frequencia = fopen(strcat(file_name, ".txt"), "r+");
+
+    ftabela_frequencia = fopen(strcat(file_name, ".txt"), "a+");
 
     if (ftabela_frequencia == NULL) {
-        printf("Erro ao abrir arquivo de...");
-        exit(-1);
+        printf("Erro ao abrir arquivo indicado.\n");
+        return;
     }
 
+//    rewind(ftabela_frequencia);
+
+    //leitura da tabela de frequencia
     while (fgets(buffer_read_file, TAM_BUFFER_READ_FILE, ftabela_frequencia)) {
         if (buffer_read_file[0] != '\n') {
             table_chars_freq = realloc(table_chars_freq, sizeof(char *) * ++tamanho_tables);
@@ -463,6 +469,7 @@ void fluxo_verificacao_frequencia() {
 
         if (ftabela_cifra == NULL) {
             printf("Erro ao abrir arquivo indicado\n");
+            return;
         }
 
         while (!feof(ftabela_cifra)) {
@@ -470,9 +477,11 @@ void fluxo_verificacao_frequencia() {
             for (int i = 0; i < TAM_BUFFER_READ_FILE || !feof(ftabela_cifra); ++i) {
                 if (buffer_read_file[i] != EOF && buffer_read_file[i] != '\n' && buffer_read_file[i] != '\0') {
                     position = get_position(table_chars_freq, buffer_read_file[i]);
+                    //TODO: get position tem que retornar -1 caso o vetor seja NULL
                     if (position > -1) {
                         table_num_ocorrencias_char[position]++;
                     } else {
+                        //TODO: caso a tabela exista, não ta pegando os valores existentes e somando
                         table_chars_freq = (char *) realloc(table_chars_freq, sizeof(char) * ++tamanho_tables);
                         table_num_ocorrencias_char = (int *) realloc(table_num_ocorrencias_char,
                                                                      sizeof(int) * tamanho_tables);
@@ -498,6 +507,8 @@ void fluxo_verificacao_frequencia() {
         fprintf(ftabela_frequencia, "%c|%d|%f\n",
                 table_chars_freq[j], table_num_ocorrencias_char[j], table_frequ[j]);
     }
+
+    printf("Tabela de frequência ok\nVerifique o arquivo para ver o resultado.\n");
 
     //fechar arquivos
     fclose(ftabela_frequencia);
