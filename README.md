@@ -25,14 +25,14 @@ o seguinte formato:
    
    * Na primeira linha, os caracteres usados na língua não cifrada, separados por um pipe `|`;
    * Na segunda linha, os caracteres usados para a encrptação/substituição também separados por um pipe `|`;
-   * Exemplo: <add link arquivo git para exemplo de tabela de substituição>
+   * Exemplo: [exemplo_tabela_substituiçao.txt](https://github.com/ddvargas/escaravelhoDeOuro/blob/master/exemplo_tabela_substitui%C3%A7ao.txt)
    
 No texto, cada caractere original da primeira linha da tabela será trocado pelo seu respectivo da linha abaixo. 
 Será gerado um novo arquivo .txt com a saída resultado da encriptação.
    
 
 ###### Verificação de plaintext
-A verificação de plaintext recebe uma tabela de substituição igual ao da cifragem e decifragem <link pra tabela>
+A verificação de plaintext recebe uma tabela de substituição igual ao da cifragem e decifragem ([exemplo_tabela_substituiçao.txt](https://github.com/ddvargas/escaravelhoDeOuro/blob/master/exemplo_tabela_substitui%C3%A7ao.txt))
 e realiza a decifragem produzindo um arquivo de saída (com nome a ser definido por você). Após, você deve especificar um 
 arquivo que contenha o conjunto de palavras que gostaria de procurar no plaintext recém decifrado. 
 Cada palavra nesse arquivo deve estar disposto em uma linha. 
@@ -46,7 +46,7 @@ A verificação de tabela de frequência recebe uma tabela de frequência em que
    * Depois o valor da frequência daquele caractere com separação decimal usando uma vírgula;
    * Todos separados por um pipe `|`;
 
-Um exemplo da tabela pode ser visualizado em <add link para o exemplo de tabela de frequencia>.
+Um exemplo da tabela pode ser visualizado em [exemplo_tabela_frequencia.txt](https://github.com/ddvargas/escaravelhoDeOuro/blob/master/exemplo_tabela_frequencia.txt)
 
 Caso a tabela exista, os valores anteriores dos caracteres e número de vezes que apareceu são mantidos 
 e acrescidos. Caso o arquivo não exista, ele é criado nesse mesmo formato. O resultado pode ser visualizado no arquivo 
