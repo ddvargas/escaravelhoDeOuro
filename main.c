@@ -501,7 +501,7 @@ void fluxo_verificacao_frequencia() {
     calculo_frequencia(table_chars_freq, table_num_ocorrencias_char, table_frequ);
     ftabela_frequencia = fopen(file_name, "w");
     if (ftabela_frequencia == NULL){
-        printf("Erro ao abrir arquivo %s para gravação\n");
+        printf("Erro ao abrir arquivo %s para gravação\n", file_name);
         return;
     }
     for (int j = 0; j < tamanho_tables; j++) {
