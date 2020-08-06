@@ -42,7 +42,7 @@ bool existe_banco(char **palavras_encontradas, int tamanho, char *pal);
  * @param dicionario onde serão lidos os caracteres usados para a encriptação
  * @return se a leitura foi completada ou não
  */
-bool read_dicionario(FILE *file_dictionary, char alfabeto[], char dicionario[]);
+bool read_table_subst(FILE *file_dictionary, char *alfabeto, char *dicionario);
 
 /**
  * Verifica a primira ocorrencia de um caractere dentro de um vetor
@@ -96,7 +96,7 @@ int main() {
                 do {
                     printf("\nCifragem e decifragem\n[1]-Cifrar mensagem\n[2]-Decifrar mensagem\n[0]-Voltar\nSelecione: ");
                     scanf("%hi", &sub_opcao_menu);
-                    resultado;
+
                     switch (sub_opcao_menu) {
                         case 1:
                             resultado = (short int) cifragem_monoalfabetica();
@@ -141,17 +141,17 @@ int main() {
 }
 
 int cifragem_monoalfabetica() {
-    FILE *fdicionario;
+    FILE *ftabela_subs;
     FILE *fcipher;
     FILE *fplaintext;
     char alfabeto[TAM_ALFABETO];
-    char dicionario[TAM_ALFABETO];
+    char tabela_subs[TAM_ALFABETO];
     char buffer[TAM_BUFFER_READ_FILE];
 
     printf("Nome tabela substuição: ");
     scanf("%s", buffer);
-    fdicionario = fopen(strcat(buffer, ".txt"), "r");
-    if (fdicionario == NULL) {
+    ftabela_subs = fopen(strcat(buffer, ".txt"), "r");
+    if (ftabela_subs == NULL) {
         return -1;
     }
 
@@ -170,19 +170,19 @@ int cifragem_monoalfabetica() {
     }
 
 
-    if (!read_dicionario(fdicionario, alfabeto, dicionario)) {
+    if (!read_table_subst(ftabela_subs, alfabeto, tabela_subs)) {
         return -1;
     }
 
     while (!feof(fplaintext)) {
         fgets(buffer, TAM_BUFFER_READ_FILE, fplaintext);
         int position;
-        for (int i = 0; i < TAM_BUFFER_READ_FILE || !feof(fplaintext); i++) {
+        for (int i = 0; i < strlen(buffer); i++) {
             if (buffer[i] != EOF && buffer[i] != '\0' && buffer[i] != '\n') {
                 if (buffer[i] != ' ') {
                     position = get_position(alfabeto, buffer[i]);
                     if (position >= 0) {
-                        putc(dicionario[position], fcipher);
+                        putc(tabela_subs[position], fcipher);
                     }
                 }
             } else {
@@ -191,13 +191,13 @@ int cifragem_monoalfabetica() {
         }
     }
     fclose(fcipher);
-    fclose(fdicionario);
+    fclose(ftabela_subs);
     fclose(fplaintext);
     return 0;
 }
 
 int get_position(char vetor[], char c) {
-    if (vetor == NULL || c == NULL){
+    if (vetor == NULL || c < 0){
         return -1;
     }
     for (int i = 0; i < strlen(vetor); i++) {
@@ -206,7 +206,7 @@ int get_position(char vetor[], char c) {
     return -1;
 }
 
-bool read_dicionario(FILE *file_dictionary, char alfabeto[], char dicionario[]) {
+bool read_table_subst(FILE *file_dictionary, char *alfabeto, char *dicionario) {
     if (file_dictionary != NULL) {
         char buffer[TAM_BUFFER_READ_FILE];
 
@@ -283,7 +283,7 @@ int decifragem_monoalfabetica(FILE *fdicionario, FILE *fcipher, FILE *fplaintext
     char dicionario[TAM_ALFABETO];
     char buffer[TAM_BUFFER_READ_FILE];
 
-    read_dicionario(fdicionario, alfabeto, dicionario);
+    read_table_subst(fdicionario, alfabeto, dicionario);
 
     while (!feof(fcipher)) {
         fgets(buffer, TAM_BUFFER_READ_FILE, fcipher);
@@ -360,10 +360,12 @@ void fluxo_verificacao_plaitext() {
         printf("Nome do arquivo de dicionário: ");
         scanf("%s", nome_arq_dcio);
         fdicionario = fopen(strcat(nome_arq_dcio, ".txt"), "r");
+
         if (fdicionario != NULL) {
             while (fgets(bufferd, TAM_BUFFER_READ_FILE, fdicionario)) {
                 if (bufferd[strlen(bufferd) - 1] == '\n'){
-                    bufferd[strlen(bufferd) - 1] = '\0'; //como o fgets está lendo o \n seto a ultima posição com o \0
+                    //como o fgets está lendo o \n seto a última posição do buffer com o '\0'
+                    bufferd[strlen(bufferd) - 1] = '\0';
                 }
                 //para cada palavra no dicionario, buscar ela no texto decifrado (que pode ou não ser correto)
                 while (fgets(bufferc, TAM_BUFFER_READ_FILE, fplaintext)) {
@@ -379,35 +381,33 @@ void fluxo_verificacao_plaitext() {
                 }
                 rewind(fplaintext);
             }
+
+
             if (num_word_encontradas != 0) {
-                //printar o resultado
                 printf("Palavras do arquivo %s encontradas no plaintext decifrado:\n", nome_arq_dcio);
                 for (int i = 0; i < num_word_encontradas; ++i) {
                     printf("%s - ", palavras_encontradas[i]);
+                    free(palavras_encontradas[i]);
                 }
+                free(palavras_encontradas);
+                palavras_encontradas = NULL;
+                num_word_encontradas = 0;
             } else {
                 printf("Nenhuma palavras do arquivo %s encontrada no plaintext decifrado\n", nome_arq_dcio);
             }
+
+
         } else {
             printf("Não foi possível encontrar o arquivo\n");
         }
 
-        //desalocar vetor de palavras se houver
-        if (palavras_encontradas != NULL) {
-            for (int i = 0; i < num_word_encontradas; ++i) {
-                free(palavras_encontradas[i]);
-            }
-            free(palavras_encontradas);
-            num_word_encontradas = 0;
-        }
-
         printf("\nDeseja verificar com mais um arquivo? 1-Sim 0-Não\nSelecione: ");
         scanf("%hi", &op_repeticao);
+        fclose(fdicionario);
     } while (op_repeticao);
 
     fclose(fplaintext);
     fclose(fcipher);
-    fclose(fdicionario);
     fclose(ftabela);
 }
 
@@ -445,8 +445,6 @@ void fluxo_verificacao_frequencia() {
         return;
     }
 
-//    rewind(ftabela_frequencia);
-
     //leitura da tabela de frequencia
     while (fgets(buffer_read_file, TAM_BUFFER_READ_FILE, ftabela_frequencia)) {
         if (buffer_read_file[0] != '\n') {
@@ -467,7 +465,6 @@ void fluxo_verificacao_frequencia() {
         scanf("%s", buffer_read_file);
 
         ftabela_cifra = fopen(strcat(buffer_read_file, ".txt"), "r");
-
         if (ftabela_cifra == NULL) {
             printf("Erro ao abrir arquivo indicado\n");
             return;
@@ -498,25 +495,23 @@ void fluxo_verificacao_frequencia() {
         printf("Deseja analisar outra cifra com a mesma tabela? (1-Sim 0-Não) ");
         scanf("%d", &op_menu);
     } while (op_menu);
-    //calcular a frequencia
-    calculo_frequencia(table_chars_freq, table_num_ocorrencias_char, table_frequ);
 
+
+    //calcular a frequencia e salvar no arquivo
+    calculo_frequencia(table_chars_freq, table_num_ocorrencias_char, table_frequ);
     ftabela_frequencia = fopen(file_name, "w");
     if (ftabela_frequencia == NULL){
         printf("Erro ao abrir arquivo %s para gravação\n");
         return;
     }
-    //salvar frequencias e num ocorrencias no arquivo ftabela_frequencia
     for (int j = 0; j < tamanho_tables; j++) {
         fprintf(ftabela_frequencia, "%c|%d|%f\n",
                 table_chars_freq[j], table_num_ocorrencias_char[j], table_frequ[j]);
     }
 
-    printf("Tabela de frequência ok\nVerifique o arquivo para ver o resultado.\n");
+    printf("Tabela de frequência ok. Verifique o arquivo para ver o resultado.\n");
 
-    //fechar arquivos
     fclose(ftabela_frequencia);
-    //desalocar memorias
     free(table_frequ);
     free(table_num_ocorrencias_char);
     free(table_chars_freq);
