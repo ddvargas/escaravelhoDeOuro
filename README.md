@@ -1,7 +1,7 @@
 # O Escaravelho de Ouro
 
 Esse software foi desenvolvido como parte de avaliação para a disciplina de Criptografia para Segurança de Dados, a fim de obter o grau de Bacharel em Sistemas de Informação pela Universidade Federal de Santa Maria - UFSM. 
-Inspirado na história [The Golden Bug](https://en.wikipedia.org/wiki/The_Gold-Bug) de Edgar Allan Poe, o intuíto era de desenvolver uma programa que fizesse análise criptográfica (verificação de plaintext com análise de frequencia de caracteres e busca de palavras conhecidas) e criptografia (encriptação e decriptação) usando o algoritmo de [substituição monoalfabética](https://pt.wikipedia.org/wiki/Cifra_de_substitui%C3%A7%C3%A3o_monoalfab%C3%A9tica)
+Inspirado na história [The Golden Bug](https://en.wikipedia.org/wiki/The_Gold-Bug) de Edgar Allan Poe, o intuíto era de desenvolver uma programa que fizesse análise criptográfica (verificação de plaintext com análise de frequência de caracteres e busca de palavras conhecidas) e criptografia (encriptação e decriptação) usando o algoritmo de [substituição monoalfabética](https://pt.wikipedia.org/wiki/Cifra_de_substitui%C3%A7%C3%A3o_monoalfab%C3%A9tica).
 
 ## Funções e Modo de uso
 #### Funções 
@@ -25,7 +25,7 @@ o seguinte formato:
    
    * Na primeira linha, os caracteres usados na língua não cifrada, separados por um pipe `|`;
    * Na segunda linha, os caracteres usados para a encrptação/substituição também separados por um pipe `|`;
-   * Exemplo: [exemplo_tabela_substituiçao.txt](https://github.com/ddvargas/escaravelhoDeOuro/blob/master/exemplo_tabela_substitui%C3%A7ao.txt)
+   * Exemplo: [exemplo_tabela_substituiçao.txt](https://github.com/ddvargas/escaravelhoDeOuro/blob/master/exemplo_tabela_substitui%C3%A7ao.txt).
    
 No texto, cada caractere original da primeira linha da tabela será trocado pelo seu respectivo da linha abaixo. 
 Será gerado um novo arquivo .txt com a saída resultado da encriptação.
@@ -44,9 +44,9 @@ A verificação de tabela de frequência recebe uma tabela de frequência em que
    * Um caractere por linha;
    * Depois do caractere, o número de vezes que apareceu;
    * Depois o valor da frequência daquele caractere com separação decimal usando uma vírgula;
-   * Todos separados por um pipe `|`;
+   * Todos separados por um pipe `|`.
 
-Um exemplo da tabela pode ser visualizado em [exemplo_tabela_frequencia.txt](https://github.com/ddvargas/escaravelhoDeOuro/blob/master/exemplo_tabela_frequencia.txt)
+Um exemplo da tabela pode ser visualizado em [exemplo_tabela_frequencia.txt](https://github.com/ddvargas/escaravelhoDeOuro/blob/master/exemplo_tabela_frequencia.txt).
 
 Caso a tabela exista, os valores anteriores dos caracteres e número de vezes que apareceu são mantidos 
 e acrescidos. Caso o arquivo não exista, ele é criado nesse mesmo formato. O resultado pode ser visualizado no arquivo 
